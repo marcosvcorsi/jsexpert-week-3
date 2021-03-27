@@ -3,7 +3,10 @@ import blessed from 'blessed';
 export class ComponentsBuilder {
   #screen;
   #layout;
+  #chat;
   #input;
+  #status;
+  #activityLog;
 
   constructor() {
 
@@ -67,10 +70,53 @@ export class ComponentsBuilder {
     return this;
   }
 
+  setChatComponent() {
+    this.#chat = blessed.list({
+      ...this.#baseComponent(),
+      parent: this.#layout,
+      align: 'left',
+      width: '50%',
+      height: '90%',
+      items: ['{bold}Messenger{/}']
+    })
+
+    return this;
+  }
+
+  setStatusComponent() {
+    this.#status = blessed.list({
+      ...this.#baseComponent(),
+      parent: this.#layout,
+      width: '25%',
+      height: '90%',
+      items: ['{bold}Users on Room{/}']
+    })
+
+    return this;
+  }
+
+  setActivityLogComponent() {
+    this.#activityLog = blessed.list({
+      ...this.#baseComponent(),
+      parent: this.#layout,
+      width: '25%',
+      height: '90%',
+      style: {
+        fg: 'yellow'
+      },
+      items: ['{bold}ActivityLog{/}']
+    })
+
+    return this;
+  }
+
   build() {
     const components = {
       screen: this.#screen,
       input: this.#input,
+      chat: this.#chat,
+      activityLog: this.#activityLog,
+      status: this.#status
     }
 
     return components;

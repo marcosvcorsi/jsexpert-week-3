@@ -1,8 +1,24 @@
 import { ComponentsBuilder } from "../components/Components.js";
+import { constants } from "../consts.js";
 
 export class TerminalController {
+  #usersColors = new Map();
+
   constructor() {
 
+  }
+
+  #pickColor() {
+    return `#${((1 << 24) * Math.random() | 0).toString(16)}-fg`; 
+  }
+
+  #getUserColor(userName) {
+    if(this.#usersColors.has(userName)) return this.#usersColors.get(userName);
+
+    const color = this.#pickColor();
+    this.#usersColors.set(userName, color);
+
+    return color;
   }
 
   #onInputReceived(eventEmitter) {
@@ -15,6 +31,51 @@ export class TerminalController {
     }
   }
 
+  #onMessageReceived({ screen, chat }) {
+    return msg => {
+      const { userName, message } = msg;
+
+      const color = this.#getUserColor(userName);
+
+      chat.addItem(`{${color}}{bold}${userName}{/}: ${message}`);
+      screen.render();
+    }
+  }
+
+  #onLogChanged({ screen, activityLog }) {
+    return msg => {
+      const [userName] = msg.split(/\s/);
+      const color = this.#getUserColor(userName);
+
+      activityLog.addItem(`{${color}}{bold}${msg.toString()}{/}`);
+
+      screen.render();
+    }
+  }
+
+  #onStatusChanged({ screen, status }) {
+    return users => {
+      const { content } = status.items.shift();
+
+      status.clearItems();
+      status.addItem(content)
+
+      users.forEach(userName => {
+        const color = this.#getUserColor(userName);
+
+        status.addItem(`{${color}}{bold}${userName}{/}`)
+      });
+
+      screen.render();
+    }
+  }
+
+  #registerEvents(eventEmitter, components) {
+    eventEmitter.on(constants.events.app.MESSAGE_RECEIVED, this.#onMessageReceived(components));
+    eventEmitter.on(constants.events.app.ACTIVITY_LOG_UPDATED, this.#onLogChanged(components));
+    eventEmitter.on(constants.events.app.STATUS_UPDATED, this.#onStatusChanged(components));
+  }
+
   async initializeTable(eventEmitter) {
     console.log('initialize');
 
@@ -22,9 +83,46 @@ export class TerminalController {
       .setScreen({ title: 'HackerChat - MVC'})
       .setLayoutComponent()
       .setInputComponent(this.#onInputReceived(eventEmitter))
+      .setChatComponent()
+      .setActivityLogComponent()
+      .setStatusComponent()
       .build();
+
+    this.#registerEvents(eventEmitter, components);
 
     components.input.focus();
     components.screen.render();  
+
+    setInterval(async () => {
+      const users = ['Bot1'];
+
+      eventEmitter.emit(constants.events.app.STATUS_UPDATED, users);
+
+      users.push('Bot2');
+
+      eventEmitter.emit(constants.events.app.STATUS_UPDATED, users);
+
+      eventEmitter.emit('activityLog:updated', 'Bot1 join');
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      eventEmitter.emit('message:received', { message: 'Olá', userName: 'Bot1'});
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      eventEmitter.emit('activityLog:updated', 'Bot2 join');
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      eventEmitter.emit('message:received', { message: 'Hey', userName: 'Bot2'});
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      eventEmitter.emit('activityLog:updated', 'Bot1 left');
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      eventEmitter.emit('activityLog:updated', 'Bot2 left');
+    }, 2000)
   }
 }
