@@ -1,3 +1,6 @@
+// heroku apps:delete
+// rm -rf .git
+
 import SocketServer from "./socket.js";
 import Event from 'events';
 import { constants } from "./consts.js";

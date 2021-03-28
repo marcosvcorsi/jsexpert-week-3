@@ -1,12 +1,14 @@
 {
-  "name": "client",
+  "name": "@marcosvcorsi/hacker-chat-client",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Hacker chat client built during JSExpert 3",
+  "main": "src/index.js",
   "license": "MIT",
   "type": "module",
+  "bin": {
+    "hacker-chat": "src/index.js"
+  },
   "scripts": {
-    "user01": "node src/index.js --username mvcorsi --room room01 --hostUri http://localhost:9898",
-    "user02": "node src/index.js --username erickwendel --room room01 --hostUri http://localhost:9898",
     "start": "node src/index.js"
   },
   "dependencies": {

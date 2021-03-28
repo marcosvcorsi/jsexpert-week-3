@@ -1,3 +1,15 @@
+#!/usr/bin/env node
+
+/*
+  chmod +x index.js
+*/
+
+/*
+hacker-chat \
+  --username mvcorsi
+  --room sala01
+*/
+
 /*
 node index.js \
   --username mvcorsi
