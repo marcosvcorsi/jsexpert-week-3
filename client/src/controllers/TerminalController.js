@@ -92,37 +92,5 @@ export class TerminalController {
 
     components.input.focus();
     components.screen.render();  
-
-    setInterval(async () => {
-      const users = ['Bot1'];
-
-      eventEmitter.emit(constants.events.app.STATUS_UPDATED, users);
-
-      users.push('Bot2');
-
-      eventEmitter.emit(constants.events.app.STATUS_UPDATED, users);
-
-      eventEmitter.emit('activityLog:updated', 'Bot1 join');
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      eventEmitter.emit('message:received', { message: 'Olá', userName: 'Bot1'});
-
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      eventEmitter.emit('activityLog:updated', 'Bot2 join');
-
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      eventEmitter.emit('message:received', { message: 'Hey', userName: 'Bot2'});
-
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      eventEmitter.emit('activityLog:updated', 'Bot1 left');
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      eventEmitter.emit('activityLog:updated', 'Bot2 left');
-    }, 2000)
   }
 }
