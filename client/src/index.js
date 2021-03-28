@@ -8,13 +8,12 @@ node index.js \
 import Events from 'events';
 import CliConfig from './config/cli.js';
 import { TerminalController } from "./controllers/TerminalController.js";
+import EventManager from './eventManager.js';
 import SocketClient from './socket.js';
 
 const [,, ...commands] = process.argv;
 
 const config = CliConfig.parseArgs(commands);
-
-console.log(config);
 
 const componentEmitter = new Events();
 
@@ -22,6 +21,19 @@ const socketClient = new SocketClient(config);
 
 await socketClient.initialize();
 
-// const controller = new TerminalController();
+const eventManager = new EventManager({ componentEmitter, socketClient });
 
-// await controller.initializeTable(componentEmitter);
+const events = eventManager.getEvents();
+
+socketClient.attachEvents(events);
+
+const data = {
+  roomId: config.room,
+  userName: config.username,
+}
+
+eventManager.joinRoomAndWaitForMessages(data);
+
+const controller = new TerminalController();
+
+await controller.initializeTable(componentEmitter);
